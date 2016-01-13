@@ -1,6 +1,4 @@
 <?php
-
-// example.com/tests/Simplex/Tests/FrameworkTest.php
 namespace Itav\Tests;
 
 use Itav\FrameEvent;
@@ -9,7 +7,7 @@ use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Controller\ControllerResolver;
 
-class FrameEventTest extends \PHPUnit_Framework_TestCase
+class FrameServiceTest extends \PHPUnit_Framework_TestCase
 {
 
 
