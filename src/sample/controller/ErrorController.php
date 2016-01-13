@@ -5,7 +5,7 @@
  * Date: 2016-01-13
  * Time: 21:27
  */
-namespace Itav\Invoice\Controller;
+namespace Itav\Sample\Controller;
 
 use Symfony\Component\Debug\Exception\FlattenException;
 use Symfony\Component\HttpFoundation\Response;

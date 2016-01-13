@@ -28,7 +28,7 @@ $sc->register('listener.response', 'Symfony\Component\HttpKernel\EventListener\R
     ->setArguments(array('%charset%'))
 ;
 $sc->register('listener.exception', 'Symfony\Component\HttpKernel\EventListener\ExceptionListener')
-    ->setArguments(array('Itav\\Invoice\\Controller\\ErrorController::exceptionAction'))
+    ->setArguments(array('Itav\\Sample\\Controller\\ErrorController::exceptionAction'))
 ;
 $sc->register('listener.string_response', 'Itav\StringResponseListener');
 $sc->register('listener.content_length', 'Itav\ContentLengthListener');

@@ -8,13 +8,8 @@
 use Symfony\Component\Routing;
 
 $routes = new Routing\RouteCollection();
-$routes->add('hello', new Routing\Route('/hello/{year}', array(
-    'year' => null,
-    '_controller' => '\Itav\Invoice\Controller\InvoiceController::indexAction',
-)));
-
-$routes->add('bye', new Routing\Route('/bye', array(
-    '_controller' => '\Itav\Invoice\Controller\InvoiceController::byeAction'
+$routes->add('homepage', new Routing\Route('/', array(
+    '_controller' => 'Itav\Sample\Controller\DefaultController::indexAction',
 )));
 
 return $routes;

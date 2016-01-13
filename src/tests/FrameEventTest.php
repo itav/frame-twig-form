@@ -1,7 +1,7 @@
 <?php
 namespace Itav\Tests;
 
-use Itav\FrameEvent;
+use Itav\FrameService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\HttpFoundation\Response;
@@ -32,7 +32,7 @@ class FrameServiceTest extends \PHPUnit_Framework_TestCase
         ;
         $resolver = new ControllerResolver();
 
-        $framework = new FrameEvent($matcher, $resolver);
+        $framework = new FrameService($matcher, $resolver);
 
         $response = $framework->handle(new Request());
 
@@ -64,7 +64,7 @@ class FrameServiceTest extends \PHPUnit_Framework_TestCase
         ;
         $resolver = $this->getMock('Symfony\Component\HttpKernel\Controller\ControllerResolverInterface');
 
-        return new FrameEvent($matcher, $resolver);
+        return new FrameService($matcher, $resolver);
     }
 
     public function testErrorHandling()

@@ -16,7 +16,6 @@ function render_template(Request $request)
     return new Response(ob_get_clean());
 }
 
-$routes = include __DIR__.'/../src/routing.php';
 $sc = include __DIR__.'/../src/container.php';
 
 $request = Request::createFromGlobals();
