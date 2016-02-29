@@ -17,4 +17,15 @@ class DefaultController
     {
         return new Response("Homepage. It is working");
     }
+    
+    public function page1Action(Request $request)
+    {
+//        $twig = $this->get('twig');
+//        $viewData = [
+//            'title' => 'Title is Page1',
+//        ];
+//        return $this->get('twig')->render('customer/view/origin/list.html.twig', $viewData);        
+        
+        return new Response("Page1. It is working");
+    }    
 }

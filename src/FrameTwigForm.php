@@ -9,6 +9,6 @@ namespace Itav;
 
 use Symfony\Component\HttpKernel\HttpKernel;
 
-class FrameService extends HttpKernel
+class FrameTwigForm extends HttpKernel
 {
 }
