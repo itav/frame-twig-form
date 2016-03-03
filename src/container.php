@@ -73,28 +73,40 @@ $sc->register('xliff_file_loader',  'Symfony\Component\Translation\Loader\XliffF
 $sc->register('translator',  'Symfony\Component\Translation\Translator')
     ->setArguments(array('%default-language%'))
     ->addMethodCall('addLoader', array('xlf', new Reference('xliff_file_loader')))
-    ->addMethodCall('addResource', array('xlf', __DIR__ . '/../messages.en.xlf', 'en'))
+    ->addMethodCall('addResource', array('xlf', __DIR__ . '/messages.en.xlf', 'en'))
 ;
 $sc->register('twig_loader_filesystem', '\Twig_Loader_Filesystem' )
     ->setArguments(array('%views_dir%', '%vendor_twig_bridge_dir%' . '/Resources/views/Form'));
+
 $twigDefinition = new DependencyInjection\Definition('\Twig_Environment', array(new Reference('twig_loader_filesystem')));
 $sc->setDefinition('twig', $twigDefinition);
+
 $sc->register('form_engine', 'Symfony\Bridge\Twig\Form\TwigRendererEngine')
     ->setArguments(array('%form_default_theme%'))
     ->addMethodCall('setEnvironment', array(new Reference('twig')))
 ;
+$sc->register('twig_renderer', 'Symfony\Bridge\Twig\Extension\FormExtension')
+        ->setArguments(array(new Reference('form_engine'), null))
+;
+$sc->register('form_extension', 'Symfony\Bridge\Twig\Extension\FormExtension')
+        ->setArguments(array(new Reference('twig_renderer')))
+;
+$sc->register('translation_extension', 'Symfony\Bridge\Twig\Extension\TranslationExtension')
+        ->setArguments(array(new Reference('translator')))
+;
+$sc->getDefinition('twig')
+        ->addMethodCall('addExtension', array(new Reference('form_extension')))
+        ->addMethodCall('addExtension', array(new Reference('translation_extension')))
+;
 
-$this->container['twig']->addExtension(new FormExtension(new TwigRenderer($this->container['form_engine'], null)));
-$this->container['twig']->addExtension(new TranslationExtension($this->container['translator']));
+$formBuilderDefinition = new DependencyInjection\Definition();
+$formBuilderDefinition->setFactory(array('Symfony\Component\Form\Forms', 'createFormFactoryBuilder'));
+$formBuilderDefinition->addMethodCall('addExtension', array(new Reference('Symfony\Component\Form\Extension\HttpFoundation\HttpFoundationExtension')));
+$sc->setDefinition('form_factory_builder', $formBuilderDefinition);
 
-$this->container['form_factory'] = function($c){
-    return Forms::createFormFactoryBuilder()
-        ->addExtension(new HttpFoundationExtension())
-        ->getFormFactory();
-};
+$formFactoryDefinition = new DependencyInjection\Definition();
+$formFactoryDefinition->setFactory(array(new Reference('form_factory_builder'), 'getFormFactory'));
 
-
-
-
+$sc->setDefinition('form_factory', $formFactoryDefinition);
 
 return $sc;

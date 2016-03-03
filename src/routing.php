@@ -14,4 +14,7 @@ $routes->add('homepage', new Routing\Route('/', array(
 $routes->add('page1', new Routing\Route('/page1', array(
     '_controller' => 'Itav\Sample\Controller\DefaultController::page1Action',
 )));
+$routes->add('info', new Routing\Route('/info', array(
+    '_controller' => 'Itav\Sample\Controller\DefaultController::infoAction',
+)));
 return $routes;
