@@ -9,9 +9,34 @@
 use Symfony\Component\DependencyInjection;
 use Symfony\Component\DependencyInjection\Reference;
 
+use Symfony\Component\Form\Forms;
+use Symfony\Component\Form\Extension\HttpFoundation\HttpFoundationExtension;
+use Symfony\Component\Translation\Translator;
+use Symfony\Component\Translation\Loader\XliffFileLoader;
+use Symfony\Bridge\Twig\Extension\TranslationExtension;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\Security\Extension\Csrf\CsrfExtension;
+use Symfony\Component\Security\Csrf\TokenStorage\SessionTokenStorage;
+use Symfony\Component\Security\Csrf\TokenGenerator\UriSafeTokenGenerator;
+use Symfony\Component\Security\Csrf\CsrfTokenManager;
+use Symfony\Bridge\Twig\Extension\FormExtension;
+use Symfony\Bridge\Twig\Form\TwigRenderer;
+use Symfony\Bridge\Twig\Form\TwigRendererEngine;
+
 $sc = new DependencyInjection\ContainerBuilder();
 $sc->setParameter('charset', 'UTF-8');
 $sc->setParameter('routes', include __DIR__.'/routing.php');
+
+$sc->setParameter('default-language', 'en');
+$sc->setParameter('form_default_theme', 'form_div_layout.html.twig');
+$sc->setParameter('vendor_dir', realpath(__DIR__ . '/../vendor'));
+
+$sc->setParameter('app_variable_reflection', new \ReflectionClass('\Symfony\Bridge\Twig\AppVariable'));
+$appVariableReflection = new \ReflectionClass('\Symfony\Bridge\Twig\AppVariable');
+$sc->setParameter('vendor_twig_bridge_dir', dirname( $appVariableReflection->getFileName()));
+
+$sc->setParameter('views_dir', realpath(__DIR__ . '/../'));
+
 
 $sc->register('context', 'Symfony\Component\Routing\RequestContext');
 $sc->register('matcher', 'Symfony\Component\Routing\Matcher\UrlMatcher')
@@ -44,65 +69,29 @@ $sc->register('framework', 'Itav\FrameTwigForm')
     ->setArguments(array(new Reference('dispatcher'), new Reference('resolver')))
 ;
 
+$sc->register('xliff_file_loader',  'Symfony\Component\Translation\Loader\XliffFileLoader');
+$sc->register('translator',  'Symfony\Component\Translation\Translator')
+    ->setArguments(array('%default-language%'))
+    ->addMethodCall('addLoader', array('xlf', new Reference('xliff_file_loader')))
+    ->addMethodCall('addResource', array('xlf', __DIR__ . '/../messages.en.xlf', 'en'))
+;
+$sc->register('twig_loader_filesystem', '\Twig_Loader_Filesystem' )
+    ->setArguments(array('%views_dir%', '%vendor_twig_bridge_dir%' . '/Resources/views/Form'));
+$twigDefinition = new DependencyInjection\Definition('\Twig_Environment', array(new Reference('twig_loader_filesystem')));
+$sc->setDefinition('twig', $twigDefinition);
+$sc->register('form_engine', 'Symfony\Bridge\Twig\Form\TwigRendererEngine')
+    ->setArguments(array('%form_default_theme%'))
+    ->addMethodCall('setEnvironment', array(new Reference('twig')))
+;
 
-//use Symfony\Component\Form\Forms;
-//use Symfony\Component\Form\Extension\HttpFoundation\HttpFoundationExtension;
-//use Symfony\Component\Translation\Translator;
-//use Symfony\Component\Translation\Loader\XliffFileLoader;
-//use Symfony\Bridge\Twig\Extension\TranslationExtension;
-//use Symfony\Component\HttpFoundation\Session\Session;
-//use Symfony\Component\Security\Extension\Csrf\CsrfExtension;
-//use Symfony\Component\Security\Csrf\TokenStorage\SessionTokenStorage;
-//use Symfony\Component\Security\Csrf\TokenGenerator\UriSafeTokenGenerator;
-//use Symfony\Component\Security\Csrf\CsrfTokenManager;
-//use Symfony\Bridge\Twig\Extension\FormExtension;
-//use Symfony\Bridge\Twig\Form\TwigRenderer;
-//use Symfony\Bridge\Twig\Form\TwigRendererEngine;
-//
-//
-//
-//        $this->container['translator'] = function($c) {
-//            $translator = new Translator('en');
-//            $translator->addLoader('xlf', new XliffFileLoader());
-//            $translator->addResource(
-//                    'xlf', __DIR__ . '/../messages.en.xlf', 'en'
-//            );
-//            return $translator;
-//        };
-//
-//        $this->container['form_default_theme'] = 'form_div_layout.html.twig';
-//        $this->container['vendor_dir'] = realpath(__DIR__ . '/../../vendor');
-//
-//        $this->container['app_variable_reflection'] = function($c) {
-//            return new \ReflectionClass('\Symfony\Bridge\Twig\AppVariable');
-//        };
-//        $this->container['vendor_twig_bridge_dir'] = function($c){
-//            return dirname($c['app_variable_reflection']->getFileName());
-//        };
-//
-//        $this->container['views_dir'] = $viewsDir = realpath(__DIR__ . '/../');
-//
-//        $this->container['twig'] = function($c) {
-//            return new \Twig_Environment(new \Twig_Loader_Filesystem(array(
-//                $c['views_dir'],
-//                $c['vendor_twig_bridge_dir'] . '/Resources/views/Form',
-//            )));
-//        };
-//        
-//        $this->container['form_engine'] = function($c){
-//            $formEngine = new TwigRendererEngine(array($c['form_default_theme']));
-//            $formEngine->setEnvironment($c['twig']);
-//            return $formEngine;
-//        };
-//
-//        $this->container['twig']->addExtension(new FormExtension(new TwigRenderer($this->container['form_engine'], null)));
-//        $this->container['twig']->addExtension(new TranslationExtension($this->container['translator']));
-//
-//        $this->container['form_factory'] = function($c){
-//            return Forms::createFormFactoryBuilder()
-//                ->addExtension(new HttpFoundationExtension())
-//                ->getFormFactory();
-//        };
+$this->container['twig']->addExtension(new FormExtension(new TwigRenderer($this->container['form_engine'], null)));
+$this->container['twig']->addExtension(new TranslationExtension($this->container['translator']));
+
+$this->container['form_factory'] = function($c){
+    return Forms::createFormFactoryBuilder()
+        ->addExtension(new HttpFoundationExtension())
+        ->getFormFactory();
+};
 
 
 
